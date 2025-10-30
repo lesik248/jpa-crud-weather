@@ -1,0 +1,136 @@
+package org.yarmosh.service;
+import org.yarmosh.dao.DaoCitizenType;
+import org.yarmosh.dao.DaoRegion;
+import org.yarmosh.dao.DaoWeather;
+import org.yarmosh.model.CitizenType;
+import org.yarmosh.model.Region;
+import org.yarmosh.model.Weather;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+public class WeatherService {
+    private final DaoWeather daoWeather;
+    private final DaoRegion daoRegion;
+    private final DaoCitizenType daoCitizenType;
+
+    public WeatherService() {
+        daoWeather = new DaoWeather();
+        daoRegion = new DaoRegion();
+        daoCitizenType = new DaoCitizenType();
+    }
+
+    private int getRegionIdByName(String name) throws WeatherServiceException {
+        List<Region> regions = daoRegion.getAll();
+
+        for (Region region : regions) {
+            if (region.getName().equalsIgnoreCase(name)) {
+                return region.getId();
+            }
+        }
+
+        throw new WeatherServiceException("Регион с названием '" + name + "' не найден.");
+    }
+
+    public List<Weather> getWeatherForRegion(String regionName) throws WeatherServiceException {
+        int regionId = getRegionIdByName(regionName);
+
+        List<Weather> weathers = daoWeather.getAll();
+        List<Weather> result = new ArrayList<>();
+        for (Weather weather : weathers) {
+            if (weather.getRegion() == regionId) {
+                result.add(weather);
+            }
+        }
+        if (result.isEmpty()) {
+            throw new WeatherServiceException("Нет данных о погоде для региона '" + regionName + "'.");
+        }
+        return result;
+    }
+
+    public List<String> getRegionSnowyDates(String regionName, int temperature) throws WeatherServiceException {
+        int regionId = getRegionIdByName(regionName);
+
+        List<Weather> weathers = daoWeather.getAll();
+        List<String> result = new ArrayList<>();
+
+        for (Weather weather : weathers) {
+            if (weather.getRegion() == regionId &&
+                    weather.getTemperature() < temperature &&
+                    weather.getPrecipitation().equals("снег")) {
+                result.add(weather.getDate());
+            }
+        }
+        if (result.isEmpty()) {
+            throw new WeatherServiceException("В регионе " + regionName + "не было дней с заданной погодой" + ".");
+        }
+        return result;
+    }
+
+    public List<Weather> getWeatherByLanguage(String language) throws WeatherServiceException {
+        List<Region> regions = daoRegion.getAll();
+        List<Weather> weathers = daoWeather.getAll();
+
+        List<String> lastWeek = getCurrWeekDays();
+        List<Integer> regionWithLanguageIds = new ArrayList<>();
+        for (Region region : regions) {
+            int citizenTypeId = region.getCitizenType();
+            CitizenType citizenType = daoCitizenType.read(citizenTypeId);
+            if (citizenType.getLanguage().equalsIgnoreCase(language)) {
+                regionWithLanguageIds.add(region.getId());
+            }
+        }
+        if (regionWithLanguageIds.isEmpty()) {
+            throw new WeatherServiceException("Нет регионов с языком: " + language + ".");
+        }
+
+        List<Weather> result = new ArrayList<>();
+        for (Weather weather : weathers) {
+            if (lastWeek.contains(weather.getDate()) && regionWithLanguageIds.contains(weather.getRegion())) {
+                result.add(weather);
+            }
+        }
+        if (result.isEmpty()) {
+            throw new WeatherServiceException("Нет информации о погоде за последнюю неделю в регионах с языком: " + language + ".");
+        }
+        return result;
+    }
+    public static List<String> getCurrWeekDays() {
+        List<String> days = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        LocalDate monday = today.with(DayOfWeek.MONDAY);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        for (int i = 0; i < 7; i++) {
+            LocalDate day = monday.plusDays(i);
+            days.add(day.format(formatter));
+        }
+
+        return days;
+    }
+    public void updateWeatherForRegion(String regionName, String date,
+                                       int temperature, String precipitation)
+            throws WeatherServiceException {
+        int regionId = getRegionIdByName(regionName);
+        Region region = daoRegion.read(regionId);
+        daoWeather.create(new Weather(1, region, date, temperature, precipitation));
+    }
+    public void createRegion(String regionName, int regionSquare, String citizenType) throws WeatherServiceException {
+        List<CitizenType> citizenTypes = daoCitizenType.getAll();
+
+        CitizenType typeForRegion = null;
+        for (CitizenType type : citizenTypes) {
+            if (type.getName().equals(citizenType)) {
+                typeForRegion = daoCitizenType.read(type.getId());
+            }
+        }
+        if (typeForRegion == null) {throw new WeatherServiceException("Тип жителей \"" + citizenType + "\" не найден.");}
+        daoRegion.create(new Region(1, regionName, regionSquare, typeForRegion));
+        System.out.println("Регион добавлен успешно!");
+    }
+}
