@@ -1,17 +1,17 @@
 package org.yarmosh.dao;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class DAO<T> {
 
-  protected EntityManagerFactory entityManagerFactory;
+  protected EntityManagerFactory emf;
   protected final Logger logger = Logger.getLogger(getClass().getName());
 
   public DAO() {
-      entityManagerFactory = Persistence.createEntityManagerFactory("hibernateDemo");
+      emf = Persistence.createEntityManagerFactory("JPADemo");
   }
 
   public abstract void create(T item)

@@ -1,15 +1,12 @@
 package org.yarmosh.dao;
 
-import javax.persistence.*;
-
+import jakarta.persistence.*;
 import org.yarmosh.model.Weather;
 
 import java.util.List;
 import java.util.logging.Level;
 
 public class DaoWeather extends DAO<Weather> {
-
-    private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("your-persistence-unit");
 
     public void create(Weather weather) {
         EntityManager em = emf.createEntityManager();
@@ -19,10 +16,11 @@ public class DaoWeather extends DAO<Weather> {
             tx.begin();
             em.persist(weather);
             tx.commit();
-            logger.log(Level.INFO, "Created Weather: {0}", weather);
+            logger.log(Level.INFO, "Создан Weather: {0}", weather);
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
-            logger.log(Level.SEVERE, "Error creating Weather: " + weather, e);
+            logger.log(Level.SEVERE, "Ошибка при создании Weather: " + weather, e);
+            throw e; // пробрасываем исключение наверх
         } finally {
             em.close();
         }
@@ -30,21 +28,21 @@ public class DaoWeather extends DAO<Weather> {
 
     public Weather read(int id) {
         EntityManager em = emf.createEntityManager();
-        Weather result = null;
-
         try {
             TypedQuery<Weather> query = em.createNamedQuery("Weather.findById", Weather.class);
             query.setParameter("id", id);
-            result = query.getSingleResult();
-            logger.log(Level.INFO, "Read Weather with id={0}: {1}", new Object[]{id, result});
+            Weather result = query.getSingleResult();
+            logger.log(Level.INFO, "Прочитан Weather с id={0}: {1}", new Object[]{id, result});
+            return result;
         } catch (NoResultException e) {
-            logger.log(Level.WARNING, "Weather with id={0} not found.", id);
+            logger.log(Level.WARNING, "Weather с id={0} не найден.", id);
+            return null;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error reading Weather with id=" + id, e);
+            logger.log(Level.SEVERE, "Ошибка при чтении Weather с id=" + id, e);
+            throw e;
         } finally {
             em.close();
         }
-        return result;
     }
 
     public void update(Weather weather) {
@@ -55,10 +53,11 @@ public class DaoWeather extends DAO<Weather> {
             tx.begin();
             em.merge(weather);
             tx.commit();
-            logger.log(Level.INFO, "Updated Weather: {0}", weather);
+            logger.log(Level.INFO, "Обновлён Weather: {0}", weather);
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
-            logger.log(Level.SEVERE, "Error updating Weather: " + weather, e);
+            logger.log(Level.SEVERE, "Ошибка при обновлении Weather: " + weather, e);
+            throw e;
         } finally {
             em.close();
         }
@@ -73,14 +72,15 @@ public class DaoWeather extends DAO<Weather> {
             Weather weather = em.find(Weather.class, id);
             if (weather != null) {
                 em.remove(weather);
-                logger.log(Level.INFO, "Deleted Weather with id={0}", id);
+                logger.log(Level.INFO, "Удалён Weather с id={0}", id);
             } else {
-                logger.log(Level.WARNING, "Attempted to delete non-existing Weather with id={0}", id);
+                logger.log(Level.WARNING, "Попытка удалить несуществующий Weather с id={0}", id);
             }
             tx.commit();
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
-            logger.log(Level.SEVERE, "Error deleting Weather with id=" + id, e);
+            logger.log(Level.SEVERE, "Ошибка при удалении Weather с id=" + id, e);
+            throw e;
         } finally {
             em.close();
         }
@@ -88,17 +88,16 @@ public class DaoWeather extends DAO<Weather> {
 
     public List<Weather> getAll() {
         EntityManager em = emf.createEntityManager();
-        List<Weather> result = null;
-
         try {
             TypedQuery<Weather> query = em.createNamedQuery("Weather.findAll", Weather.class);
-            result = query.getResultList();
-            logger.log(Level.INFO, "Fetched {0} Weather records.", result.size());
+            List<Weather> result = query.getResultList();
+            logger.log(Level.INFO, "Получено {0} записей Weather.", result.size());
+            return result;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error fetching all Weather records.", e);
+            logger.log(Level.SEVERE, "Ошибка при получении всех записей Weather.", e);
+            throw e;
         } finally {
             em.close();
         }
-        return result;
     }
 }

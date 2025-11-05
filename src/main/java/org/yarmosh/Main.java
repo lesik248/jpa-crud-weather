@@ -9,6 +9,9 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
 
+        System.setErr(System.out);
+        System.out.flush();
+
         WeatherService weatherService = new WeatherService();
 
         Scanner myObj = new Scanner(System.in);

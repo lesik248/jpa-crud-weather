@@ -24,7 +24,8 @@ public class Region {
 
     private int square;
 
-    @Column(name="citizen_type")
+    @ManyToOne
+    @JoinColumn(name = "citizen_type")
     private CitizenType citizenType;
 
     public Region() {}
@@ -44,8 +45,8 @@ public class Region {
     public int getSquare() {
         return square;
     }
-    public int getCitizenType() {
-        return citizenType.getId();
+    public CitizenType getCitizenType() {
+        return citizenType;
     }
     public void setId(int id) {
         this.id = id;

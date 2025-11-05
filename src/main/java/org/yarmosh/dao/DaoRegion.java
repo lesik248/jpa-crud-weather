@@ -1,15 +1,12 @@
 package org.yarmosh.dao;
 
-import javax.persistence.*;
-
+import jakarta.persistence.*;
 import org.yarmosh.model.Region;
 
 import java.util.List;
 import java.util.logging.Level;
 
 public class DaoRegion extends DAO<Region> {
-
-    private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("your-persistence-unit");
 
     public void create(Region region) {
         EntityManager em = emf.createEntityManager();
@@ -19,10 +16,11 @@ public class DaoRegion extends DAO<Region> {
             tx.begin();
             em.persist(region);
             tx.commit();
-            logger.log(Level.INFO, "Created Region: {0}", region);
+            logger.log(Level.INFO, "Создан Region: {0}", region);
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
-            logger.log(Level.SEVERE, "Error creating Region: " + region, e);
+            logger.log(Level.SEVERE, "Ошибка при создании Region: " + region, e);
+            throw e;
         } finally {
             em.close();
         }
@@ -30,21 +28,21 @@ public class DaoRegion extends DAO<Region> {
 
     public Region read(int id) {
         EntityManager em = emf.createEntityManager();
-        Region result = null;
-
         try {
             TypedQuery<Region> query = em.createNamedQuery("Region.findById", Region.class);
             query.setParameter("id", id);
-            result = query.getSingleResult();
-            logger.log(Level.INFO, "Read Region with id={0}: {1}", new Object[]{id, result});
+            Region result = query.getSingleResult();
+            logger.log(Level.INFO, "Прочитан Region с id={0}: {1}", new Object[]{id, result});
+            return result;
         } catch (NoResultException e) {
-            logger.log(Level.WARNING, "Region with id={0} not found.", id);
+            logger.log(Level.WARNING, "Region с id={0} не найден.", id);
+            return null;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error reading Region with id=" + id, e);
+            logger.log(Level.SEVERE, "Ошибка при чтении Region с id=" + id, e);
+            throw e;
         } finally {
             em.close();
         }
-        return result;
     }
 
     public void update(Region region) {
@@ -55,10 +53,11 @@ public class DaoRegion extends DAO<Region> {
             tx.begin();
             em.merge(region);
             tx.commit();
-            logger.log(Level.INFO, "Updated Region: {0}", region);
+            logger.log(Level.INFO, "Обновлён Region: {0}", region);
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
-            logger.log(Level.SEVERE, "Error updating Region: " + region, e);
+            logger.log(Level.SEVERE, "Ошибка при обновлении Region: " + region, e);
+            throw e;
         } finally {
             em.close();
         }
@@ -73,14 +72,15 @@ public class DaoRegion extends DAO<Region> {
             Region region = em.find(Region.class, id);
             if (region != null) {
                 em.remove(region);
-                logger.log(Level.INFO, "Deleted Region with id={0}", id);
+                logger.log(Level.INFO, "Удалён Region с id={0}", id);
             } else {
-                logger.log(Level.WARNING, "Attempted to delete non-existing Region with id={0}", id);
+                logger.log(Level.WARNING, "Попытка удалить несуществующий Region с id={0}", id);
             }
             tx.commit();
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
-            logger.log(Level.SEVERE, "Error deleting Region with id=" + id, e);
+            logger.log(Level.SEVERE, "Ошибка при удалении Region с id=" + id, e);
+            throw e;
         } finally {
             em.close();
         }
@@ -88,17 +88,16 @@ public class DaoRegion extends DAO<Region> {
 
     public List<Region> getAll() {
         EntityManager em = emf.createEntityManager();
-        List<Region> result = null;
-
         try {
             TypedQuery<Region> query = em.createNamedQuery("Region.findAll", Region.class);
-            result = query.getResultList();
-            logger.log(Level.INFO, "Fetched {0} Region records.", result.size());
+            List<Region> result = query.getResultList();
+            logger.log(Level.INFO, "Получено {0} записей Region.", result.size());
+            return result;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error fetching all Region records.", e);
+            logger.log(Level.SEVERE, "Ошибка при получении всех записей Region.", e);
+            throw e;
         } finally {
             em.close();
         }
-        return result;
     }
 }

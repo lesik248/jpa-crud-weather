@@ -20,7 +20,8 @@ public class Weather {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name="region")
+    @ManyToOne
+    @JoinColumn(name = "RegionId")
     private Region region;
 
     private String date;
