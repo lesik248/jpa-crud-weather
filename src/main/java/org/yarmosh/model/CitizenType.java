@@ -4,16 +4,6 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "citizen_type")
-@NamedQueries({
-        @NamedQuery(
-                name = "CitizenType.findById",
-                query = "SELECT c FROM CitizenType c WHERE c.id = :id"
-        ),
-        @NamedQuery(
-                name = "CitizenType.findAll",
-                query = "SELECT c FROM CitizenType c"
-        )
-})
 public class CitizenType {
 
     @Id
@@ -34,6 +24,7 @@ public class CitizenType {
         this.language = language;
         this.number = number;
     }
+
     public int getId() {
         return id;
     }
@@ -46,6 +37,7 @@ public class CitizenType {
     public int getNumber() {
         return number;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -54,5 +46,13 @@ public class CitizenType {
     }
     public void setNumber(int number) {
         this.number = number;
+    }
+
+    @Override
+    public String toString() {
+        return "CitizenType{id=" + id +
+                ", name='" + name + '\'' +
+                ", language='" + language + '\'' +
+                ", number=" + number + '}';
     }
 }

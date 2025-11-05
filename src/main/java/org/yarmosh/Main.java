@@ -59,7 +59,7 @@ public class Main {
                     case "4": {
                         System.out.print("Введите название региона: ");
                         String region = myObj.nextLine();
-                        System.out.print("Введите дату в формате ГГ-ММ-ДД: ");
+                        System.out.print("Введите дату в формате ГГГГ-ММ-ДД: ");
                         String date = myObj.nextLine();
                         System.out.print("Введите температуру (в °C): ");
                         int temperature = Integer.parseInt(myObj.nextLine());
@@ -76,7 +76,7 @@ public class Main {
                         int square = Integer.parseInt(myObj.nextLine());
                         System.out.print("Введите тип жителей: ");
                         String citizenType = myObj.nextLine();
-                        weatherService.createRegion(region, square, citizenType);
+                        weatherService.createRegion(region, square, citizenType.toLowerCase());
                         System.out.println("Регион успешно добавлен.");
                         break;
                     }
