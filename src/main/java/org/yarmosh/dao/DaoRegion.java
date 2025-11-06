@@ -10,9 +10,6 @@ import java.util.logging.Level;
 
 public class DaoRegion extends DAO<Region> {
 
-    /**
-     * Создание нового Region (INSERT)
-     */
     public void create(Region region) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -31,9 +28,6 @@ public class DaoRegion extends DAO<Region> {
         }
     }
 
-    /**
-     * Чтение Region по ID (SELECT ... WHERE id = :id)
-     */
     public Region read(int id) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -57,9 +51,6 @@ public class DaoRegion extends DAO<Region> {
         }
     }
 
-    /**
-     * Обновление Region (UPDATE ... SET ...)
-     */
     public void update(Region region) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -91,9 +82,6 @@ public class DaoRegion extends DAO<Region> {
         }
     }
 
-    /**
-     * Удаление Region по ID (DELETE ... WHERE id = :id)
-     */
     public void delete(int id) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -123,9 +111,6 @@ public class DaoRegion extends DAO<Region> {
         }
     }
 
-    /**
-     * Получение всех Region (SELECT * FROM region)
-     */
     public List<Region> getAll() {
         EntityManager em = emf.createEntityManager();
         try {
