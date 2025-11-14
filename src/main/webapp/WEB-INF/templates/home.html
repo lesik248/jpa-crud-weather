@@ -5,12 +5,23 @@
     <title th:text="${title}">Главная</title>
 </head>
 <body>
-<h1 th:text="${title}">Погода</h1>
-<p th:text="${message}">Добро пожаловать!</p>
+<h1 th:text="${title}"></h1>
+<p th:text="${message}"></p>
 
 <h3>Навигация:</h3>
 <ul>
     <li><a href="MyServlettest/weather">Запросы</a></li>
 </ul>
+
+<p>Ваши посещения: <span th:text="${visits}">0</span></p>
+
+<p th:if="${lastVisit != null}">
+    Последний визит: <span th:text="${lastVisit}"></span>
+</p>
+
+<p th:if="${lastVisit == null}">
+    Первый визит! Добро пожаловать!
+</p>
+
 </body>
 </html>

@@ -2,9 +2,7 @@ package org.yarmosh.servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
@@ -22,6 +20,8 @@ import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @WebServlet(name="MyServletname", urlPatterns = "/MyServlettest/*")
 public class MyServlet extends HttpServlet {
@@ -56,8 +56,12 @@ public class MyServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
         response.setContentType("text/html;charset=UTF-8");
+
+        HttpSession session = request.getSession(true);
+        handleCookies(request, response);
+
 
         try (Writer writer = response.getWriter()) {
 
@@ -84,4 +88,53 @@ public class MyServlet extends HttpServlet {
             }
         }
     }
+    private void handleCookies(HttpServletRequest request, HttpServletResponse response) {
+
+        String lastVisitRaw = null;
+        int visits = 0;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("lastVisit".equals(c.getName())) {
+                    lastVisitRaw = c.getValue();
+                } else if ("visits".equals(c.getName())) {
+                    try {
+                        visits = Integer.parseInt(c.getValue());
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+        }
+
+        visits++;
+
+        Cookie visitCookie = new Cookie("visits", String.valueOf(visits));
+        Cookie dateCookie = new Cookie("lastVisit", String.valueOf(System.currentTimeMillis()));
+
+        visitCookie.setPath("/");
+        dateCookie.setPath("/");
+
+        int month = 60 * 60 * 24 * 30;
+        visitCookie.setMaxAge(month);
+        dateCookie.setMaxAge(month);
+
+        response.addCookie(visitCookie);
+        response.addCookie(dateCookie);
+
+        String lastVisitStr = null;
+
+        if (lastVisitRaw != null) {
+            try {
+                long ts = Long.parseLong(lastVisitRaw);
+                Date date = new Date(ts);
+
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+                lastVisitStr = fmt.format(date);
+            } catch (Exception ignored) {}
+        }
+
+        request.setAttribute("lastVisit", lastVisitStr);
+        request.setAttribute("visits", visits);
+    }
+
 }
