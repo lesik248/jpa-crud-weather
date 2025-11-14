@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-@WebServlet(name="MyServletname", urlPatterns = "/MyServlettest")
+@WebServlet(name="MyServletname", urlPatterns = "/MyServlettest/*")
 public class MyServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private JakartaServletWebApplication application;
@@ -60,32 +60,28 @@ public class MyServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
 
         try (Writer writer = response.getWriter()) {
-            WeatherService weatherService = new WeatherService();
 
-            String regionName = request.getParameter("region");
-            String action = request.getParameter("action");
-
-
-            String path = request.getRequestURI();
             IController controller;
 
+            String requestURI = request.getRequestURI();
+            String query = request.getQueryString();
 
-            if (path.endsWith("/weather")) {
-                controller = new WeatherController();
+            if ("/MyServlettest".equals(requestURI) && query == null) {
+                controller = new HomeController();
             }
             else {
-                controller = new HomeController();
+                controller = new WeatherController();
             }
 
             final IServletWebExchange webExchange = this.application.buildExchange(request, response);
 
-            WebContext context = new WebContext(webExchange, webExchange.getLocale());
-
             controller.process(webExchange, templateEngine, writer);
 
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }  catch (Exception e) {
             e.printStackTrace();
+            if (!response.isCommitted()) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            }
         }
     }
 }

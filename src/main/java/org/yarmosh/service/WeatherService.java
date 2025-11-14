@@ -34,7 +34,7 @@ public class WeatherService {
             }
             throw new WeatherServiceException("Регион с названием '" + name + "' не найден.");
         } catch (Exception e) {
-            throw new WeatherServiceException("Ошибка БД при поиске региона по названию.");
+            throw new WeatherServiceException("Ошибка БД при поиске региона по названию.", e);
         }
     }
 

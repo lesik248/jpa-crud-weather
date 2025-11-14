@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Data</title>
+
+    <script>
+        function updateFields() {
+            let action = document.getElementById("action").value;
+
+            document.getElementById("region-field").style.display = "none";
+            document.getElementById("temperature-field").style.display = "none";
+            document.getElementById("lang-field").style.display = "none";
+            document.getElementById("date-field").style.display = "none";
+            document.getElementById("prec-field").style.display = "none";
+            document.getElementById("square-field").style.display = "none";
+            document.getElementById("citizen-field").style.display = "none";
+
+            if (action === "getForRegion") {
+                document.getElementById("region-field").style.display = "block";
+            }
+            else if (action === "getSnowyDates") {
+                document.getElementById("region-field").style.display = "block";
+                document.getElementById("temperature-field").style.display = "block";
+            }
+            else if (action === "getForLanguage") {
+                document.getElementById("lang-field").style.display = "block";
+            }
+            else if (action === "updateForRegion") {
+                document.getElementById("region-field").style.display = "block";
+                document.getElementById("date-field").style.display = "block";
+                document.getElementById("temperature-field").style.display = "block";
+                document.getElementById("prec-field").style.display = "block";
+            }
+            else if (action === "addRegion") {
+                document.getElementById("region-field").style.display = "block";
+                document.getElementById("square-field").style.display = "block";
+                document.getElementById("citizen-field").style.display = "block";
+            }
+        }
+    </script>
+</head>
+<body onload="updateFields()">
+
+<h1>Weather Data</h1>
+
+<form method="get" action="/MyServlettest">
+    <label>Выберите действие:</label>
+    <select name="action" id="action" onchange="updateFields()">
+        <option value="getForRegion">1 — Погода в регионе</option>
+        <option value="getSnowyDates">2 — Даты, когда в регионе был снег и погода ниже заданной</option>
+        <option value="getForLanguage">3 — Погода за прошедшую неделю в регионах с заданным языком</option>
+        <option value="updateForRegion">4 — Добавить сведения о погоде в регионе</option>
+        <option value="addRegion">5 — Добавить новый регион</option>
+    </select>
+    <br><br>
+
+    <div id="region-field">
+        <label>Регион:</label>
+        <input type="text" name="region" placeholder="например, Минск"/>
+        <br><br>
+    </div>
+
+    <div id="temperature-field">
+        <label>Температура:</label>
+        <input type="number" name="temperature" placeholder="-5"/>
+        <br><br>
+    </div>
+
+    <div id="lang-field">
+        <label>Язык:</label>
+        <input type="text" name="lang" placeholder="белорусский"/>
+        <br><br>
+    </div>
+
+    <div id="date-field">
+        <label>Дата:</label>
+        <input type="text" name="date" placeholder="2024-12-31"/>
+        <br><br>
+    </div>
+
+    <div id="prec-field">
+        <label>Осадки:</label>
+        <input type="text" name="precipitation" placeholder="например, дождь"/>
+        <br><br>
+    </div>
+
+    <div id="square-field">
+        <label>Площадь региона:</label>
+        <input type="number" name="square" placeholder="10000"/>
+        <br><br>
+    </div>
+
+    <div id="citizen-field">
+        <label>Тип жителей:</label>
+        <input type="text" name="citizen-type" placeholder="например, американцы"/>
+        <br><br>
+    </div>
+
+    <button type="submit">Отправить</button>
+</form>
+
+<hr>
+
+<div th:if="${data != null}">
+    <pre th:text="${data}"></pre>
+</div>
+
+</body>
+</html>
