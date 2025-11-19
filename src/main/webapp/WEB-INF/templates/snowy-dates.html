@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Снежные даты</title></head>
+<body>
+
+<h1>Снежные даты</h1>
+
+<form method="get" action="/MyServlettest/weather/getSnowyDates">
+    <label>Регион:</label>
+    <input type="text" name="region"/><br><br>
+
+    <label>Температура ниже:</label>
+    <input type="number" name="temperature"/><br><br>
+
+    <button type="submit">Показать</button>
+</form>
+
+<hr>
+<div th:if="${data != null}">
+    <pre th:text="${data}"></pre>
+</div>
+
+</body>
+</html>

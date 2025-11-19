@@ -22,9 +22,12 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebServlet(name="MyServletname", urlPatterns = "/MyServlettest/*")
 public class MyServlet extends HttpServlet {
+    private static final Logger logger = Logger.getLogger(MyServlet.class.getName());
     private static final long serialVersionUID = 1L;
     private JakartaServletWebApplication application;
     private ITemplateEngine templateEngine;
@@ -55,39 +58,54 @@ public class MyServlet extends HttpServlet {
         return templateEngine;
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+
         response.setContentType("text/html;charset=UTF-8");
-
-        HttpSession session = request.getSession(true);
-        handleCookies(request, response);
-
 
         try (Writer writer = response.getWriter()) {
 
             IController controller;
 
-            String requestURI = request.getRequestURI();
-            String query = request.getQueryString();
+            String uri = request.getRequestURI();
+            String path = uri.replaceFirst(".*/MyServlettest/", "");
 
-            if ("/MyServlettest".equals(requestURI) && query == null) {
+            if (path.equals("") || path.equals("/")) {
+                controller = new HomeController();
+            } else if (path.startsWith("weather")) {
+                controller = new WeatherController(path);
+            } else {
                 controller = new HomeController();
             }
-            else {
-                controller = new WeatherController();
-            }
 
-            final IServletWebExchange webExchange = this.application.buildExchange(request, response);
+            IServletWebExchange exchange = application.buildExchange(request, response);
+            controller.process(exchange, templateEngine, writer);
 
-            controller.process(webExchange, templateEngine, writer);
+        } catch (Exception e) {
 
-        }  catch (Exception e) {
-            e.printStackTrace();
-            if (!response.isCommitted()) {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-            }
+            logger.log(Level.SEVERE, "Критическая ошибка сервлета", e);
+
+            showErrorPage(request, response, "Критическая ошибка: " + e.getMessage());
         }
     }
+
+    private void showErrorPage(HttpServletRequest req,
+                               HttpServletResponse resp,
+                               String message) throws IOException {
+
+        WebContext ctx = new WebContext(
+                application.buildExchange(req, resp),
+                req.getLocale()
+        );
+        ctx.setVariable("message", message);
+
+        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+
+        templateEngine.process("error", ctx, resp.getWriter());
+    }
+
+
     private void handleCookies(HttpServletRequest request, HttpServletResponse response) {
 
         String lastVisitRaw = null;

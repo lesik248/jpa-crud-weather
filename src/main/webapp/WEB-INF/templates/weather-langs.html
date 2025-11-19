@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Погода по языку</title></head>
+<body>
+
+<h1>Погода по языку</h1>
+
+<form method="get" action="/MyServlettest/weather/getForLanguage">
+    <label>Язык:</label>
+    <input type="text" name="lang"/><br><br>
+
+    <button type="submit">Показать</button>
+</form>
+
+<hr>
+<div th:if="${data != null}">
+    <pre th:text="${data}"></pre>
+</div>
+
+</body>
+</html>

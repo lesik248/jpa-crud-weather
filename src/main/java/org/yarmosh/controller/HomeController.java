@@ -18,6 +18,6 @@ public class HomeController implements IController {
         context.setVariable("title", "Weather Application");
         context.setVariable("message", "Добро пожаловать в приложение для работы с погодой!");
 
-        templateEngine.process("home", context, writer);
+        templateEngine.process("index", context, writer);
     }
 }

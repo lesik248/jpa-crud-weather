@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Добавить погоду</title></head>
+<body>
+
+<h1>Добавить данные погоды</h1>
+
+<form method="get" action="/MyServlettest/weather/updateForRegion">
+    <label>Регион:</label>
+    <input type="text" name="region"/><br><br>
+
+    <label>Дата (YYYY-MM-DD):</label>
+    <input type="text" name="date"/><br><br>
+
+    <label>Температура:</label>
+    <input type="number" name="temperature"/><br><br>
+
+    <label>Осадки:</label>
+    <input type="text" name="precipitation"/><br><br>
+
+    <button type="submit">Добавить</button>
+</form>
+
+<hr>
+<div th:if="${data != null}">
+    <pre th:text="${data}"></pre>
+</div>
+
+</body>
+</html>

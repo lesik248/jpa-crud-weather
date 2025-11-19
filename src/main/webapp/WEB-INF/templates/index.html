@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная</title>
+</head>
+<body>
+
+<h1>Добро пожаловать!</h1>
+
+<h2>Навигация по функциям погоды</h2>
+<ul>
+    <li><a href="/MyServlettest/weather/getForRegion">Погода в регионе</a></li>
+    <li><a href="/MyServlettest/weather/getSnowyDates">Даты снега</a></li>
+    <li><a href="/MyServlettest/weather/getForLanguage">Погода по языку регионов</a></li>
+    <li><a href="/MyServlettest/weather/updateForRegion">Добавить данные о погоде</a></li>
+    <li><a href="/MyServlettest/weather/addRegion">Добавить новый регион</a></li>
+</ul>
+
+<hr>
+
+<p>Ваши посещения: <span th:text="${visits}">0</span></p>
+
+<p th:if="${lastVisit != null}">
+    Последний визит: <span th:text="${lastVisit}"></span>
+</p>
+
+<p th:if="${lastVisit == null}">
+    Первый визит! Добро пожаловать!
+</p>
+
+</body>
+</html>

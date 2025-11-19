@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Добавить регион</title></head>
+<body>
+
+<h1>Добавить регион</h1>
+
+<form method="get" action="/MyServlettest/weather/addRegion">
+    <label>Имя региона:</label>
+    <input type="text" name="region"/><br><br>
+
+    <label>Площадь:</label>
+    <input type="number" name="square"/><br><br>
+
+    <label>Тип жителей:</label>
+    <input type="text" name="citizen-type"/><br><br>
+
+    <button type="submit">Добавить</button>
+</form>
+
+<hr>
+<div th:if="${data != null}">
+    <pre th:text="${data}"></pre>
+</div>
+
+</body>
+</html>
