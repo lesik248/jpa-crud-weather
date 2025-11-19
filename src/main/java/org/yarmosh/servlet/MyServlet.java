@@ -64,6 +64,8 @@ public class MyServlet extends HttpServlet {
 
         response.setContentType("text/html;charset=UTF-8");
 
+        handleCookies(request, response);
+
         try (Writer writer = response.getWriter()) {
 
             IController controller;
