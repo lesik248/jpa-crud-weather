@@ -5,6 +5,20 @@
 </head>
 <body>
 
+<div class="navbar">
+    <a href="/MyServlettest/index.html">Главная</a>
+
+    <a href="/MyServlettest/weather/getForRegion">Погода в регионе</a>
+
+    <a href="/MyServlettest/weather/getSnowyDates">Снежные даты</a>
+
+    <a href="/MyServlettest/weather/getForLanguage">Погода по языку</a>
+
+    <a href="/MyServlettest/weather/updateForRegion">Обновить погоду</a>
+
+    <a href="/MyServlettest/weather/addRegion">Добавить регион</a>
+</div>
+
 <h1>Снежные даты</h1>
 
 <form method="get" action="/MyServlettest/weather/getSnowyDates">
@@ -21,6 +35,7 @@
 <div th:if="${data != null}">
     <pre th:text="${data}"></pre>
 </div>
+<div class="error" th:if="${error}" th:text="${error}"></div>
 
 </body>
 </html>

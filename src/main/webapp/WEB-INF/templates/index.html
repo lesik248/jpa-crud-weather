@@ -7,6 +7,20 @@
 </head>
 <body>
 
+<div class="navbar">
+    <a href="/MyServlettest/index.html">Главная</a>
+
+    <a href="/MyServlettest/weather/getForRegion">Погода в регионе</a>
+
+    <a href="/MyServlettest/weather/getSnowyDates">Снежные даты</a>
+
+    <a href="/MyServlettest/weather/getForLanguage">Погода по языку</a>
+
+    <a href="/MyServlettest/weather/updateForRegion">Обновить погоду</a>
+
+    <a href="/MyServlettest/weather/addRegion">Добавить регион</a>
+</div>
+
 <h1>Добро пожаловать!</h1>
 
 <h2>Навигация по функциям погоды</h2>
@@ -29,6 +43,7 @@
 <p th:if="${lastVisit == null}">
     Первый визит! Добро пожаловать!
 </p>
+
 
 </body>
 </html>

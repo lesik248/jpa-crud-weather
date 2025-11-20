@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WeatherService {
+
     private final DaoWeather daoWeather;
     private final DaoRegion daoRegion;
     private final DaoCitizenType daoCitizenType;
@@ -24,101 +25,128 @@ public class WeatherService {
         daoCitizenType = new DaoCitizenType();
     }
 
-    private int getRegionIdByName(String name) throws WeatherServiceException {
+    private int getRegionIdByName(String name)
+            throws WeatherNotFoundException, WeatherDatabaseException {
         try {
             List<Region> regions = daoRegion.getAll();
+
             for (Region region : regions) {
                 if (region.getName().equalsIgnoreCase(name)) {
                     return region.getId();
                 }
             }
-            throw new WeatherServiceException("Регион с названием '" + name + "' не найден.");
+
+            throw new WeatherNotFoundException("Регион '" + name + "' не найден.");
+
+        } catch (WeatherNotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            throw new WeatherServiceException("Ошибка БД при поиске региона по названию.", e);
+            throw new WeatherDatabaseException(
+                    "Ошибка БД при поиске региона по названию.", e);
         }
     }
 
-    public List<Weather> getWeatherForRegion(String regionName) throws WeatherServiceException {
+    public List<Weather> getWeatherForRegion(String regionName)
+            throws WeatherNotFoundException, WeatherDatabaseException {
         try {
             int regionId = getRegionIdByName(regionName);
-            List<Weather> weathers = daoWeather.getAll();
+            List<Weather> allWeather = daoWeather.getAll();
 
             List<Weather> result = new ArrayList<>();
-            for (Weather weather : weathers) {
-                if (weather.getRegion() == regionId) {
-                    result.add(weather);
+            for (Weather w : allWeather) {
+                if (w.getRegion() == regionId) {
+                    result.add(w);
                 }
             }
 
             if (result.isEmpty()) {
-                throw new WeatherServiceException("Нет данных о погоде для региона '" + regionName + "'.");
+                throw new WeatherNotFoundException(
+                        "Нет данных о погоде для региона '" + regionName + "'."
+                );
             }
+
             return result;
-        } catch (WeatherServiceException e) {
+
+        } catch (WeatherNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new WeatherServiceException("Ошибка БД при получении данных о погоде.");
+            throw new WeatherDatabaseException(
+                    "Ошибка БД при получении данных о погоде.", e);
         }
     }
 
-    public List<String> getRegionSnowyDates(String regionName, int temperature) throws WeatherServiceException {
+    public List<String> getRegionSnowyDates(String regionName, int temperature)
+            throws WeatherNotFoundException, WeatherDatabaseException {
         try {
             int regionId = getRegionIdByName(regionName);
-            List<Weather> weathers = daoWeather.getAll();
-            List<String> result = new ArrayList<>();
+            List<Weather> allWeather = daoWeather.getAll();
 
-            for (Weather weather : weathers) {
+            List<String> result = new ArrayList<>();
+            for (Weather weather : allWeather) {
                 if (weather.getRegion() == regionId &&
                         weather.getTemperature() < temperature &&
                         "снег".equalsIgnoreCase(weather.getPrecipitation())) {
+
                     result.add(weather.getDate());
                 }
             }
 
             if (result.isEmpty()) {
-                throw new WeatherServiceException("В регионе " + regionName + " не было дней с заданной погодой.");
+                throw new WeatherNotFoundException(
+                        "В регионе '" + regionName + "' не найдено снежных дней."
+                );
             }
+
             return result;
-        } catch (WeatherServiceException e) {
+
+        } catch (WeatherNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new WeatherServiceException("Ошибка БД при получении погодных данных.");
+            throw new WeatherDatabaseException(
+                    "Ошибка БД при получении погодных данных.", e);
         }
     }
 
-    public List<Weather> getWeatherByLanguage(String language) throws WeatherServiceException {
+    public List<Weather> getWeatherByLanguage(String language)
+            throws WeatherNotFoundException, WeatherDatabaseException {
         try {
             List<Region> regions = daoRegion.getAll();
-            List<Weather> weathers = daoWeather.getAll();
+            List<Weather> weatherList = daoWeather.getAll();
             List<String> lastWeek = getCurrWeekDays();
 
-            List<Integer> regionWithLanguageIds = new ArrayList<>();
+            List<Integer> regionIds = new ArrayList<>();
             for (Region region : regions) {
-                CitizenType citizenType = region.getCitizenType();
-                if (citizenType.getLanguage().equalsIgnoreCase(language)) {
-                    regionWithLanguageIds.add(region.getId());
+                if (region.getCitizenType().getLanguage().equalsIgnoreCase(language)) {
+                    regionIds.add(region.getId());
                 }
             }
 
-            if (regionWithLanguageIds.isEmpty()) {
-                throw new WeatherServiceException("Нет регионов с языком: " + language + ".");
+            if (regionIds.isEmpty()) {
+                throw new WeatherNotFoundException(
+                        "Нет регионов с языком '" + language + "'."
+                );
             }
 
             List<Weather> result = new ArrayList<>();
-            for (Weather weather : weathers) {
-                if (lastWeek.contains(weather.getDate()) && regionWithLanguageIds.contains(weather.getRegion())) {
-                    result.add(weather);
+            for (Weather w : weatherList) {
+                if (lastWeek.contains(w.getDate()) && regionIds.contains(w.getRegion())) {
+                    result.add(w);
                 }
             }
 
             if (result.isEmpty()) {
-                throw new WeatherServiceException("Нет информации о погоде за последнюю неделю в регионах с языком: " + language + ".");
+                throw new WeatherNotFoundException(
+                        "Нет погодных данных за последнюю неделю для регионов с языком '" + language + "'."
+                );
             }
+
             return result;
-        } catch (WeatherServiceException e) {
+
+        } catch (WeatherNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new WeatherServiceException("Ошибка БД при получении данных о погоде по языку.");
+            throw new WeatherDatabaseException(
+                    "Ошибка БД при получении данных о погоде по языку.", e);
         }
     }
 
@@ -126,51 +154,61 @@ public class WeatherService {
         List<String> days = new ArrayList<>();
         LocalDate today = LocalDate.now();
         LocalDate monday = today.with(DayOfWeek.MONDAY);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         for (int i = 0; i < 7; i++) {
-            days.add(monday.plusDays(i).format(formatter));
+            days.add(monday.plusDays(i).format(fmt));
         }
+
         return days;
     }
 
     public void updateWeatherForRegion(String regionName, String date,
                                        int temperature, String precipitation)
-            throws WeatherServiceException {
+            throws WeatherNotFoundException, WeatherDatabaseException {
+
         try {
             int regionId = getRegionIdByName(regionName);
             Region region = daoRegion.read(regionId);
-            daoWeather.create(new Weather(1, region, date, temperature, precipitation));
-        } catch (WeatherServiceException e) {
+
+            daoWeather.create(new Weather(0, region, date, temperature, precipitation));
+
+        } catch (WeatherNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new WeatherServiceException("Ошибка БД при обновлении данных о погоде.");
+            throw new WeatherDatabaseException(
+                    "Ошибка БД при обновлении погодных данных.", e);
         }
     }
 
     public void createRegion(String regionName, int regionSquare, String citizenType)
-            throws WeatherServiceException {
-        try {
-            List<CitizenType> citizenTypes = daoCitizenType.getAll();
-            CitizenType typeForRegion = null;
+            throws WeatherNotFoundException, WeatherDatabaseException {
 
-            for (CitizenType type : citizenTypes) {
-                if (type.getName().equals(citizenType)) {
-                    typeForRegion = daoCitizenType.read(type.getId());
+        try {
+            List<CitizenType> types = daoCitizenType.getAll();
+            CitizenType found = null;
+
+            for (CitizenType type : types) {
+                if (type.getName().equalsIgnoreCase(citizenType)) {
+                    found = daoCitizenType.read(type.getId());
                     break;
                 }
             }
 
-            if (typeForRegion == null) {
-                throw new WeatherServiceException("Тип жителей \"" + citizenType + "\" не найден.");
+            if (found == null) {
+                throw new WeatherNotFoundException(
+                        "Тип жителей '" + citizenType + "' не найден."
+                );
             }
 
-            daoRegion.create(new Region(1, regionName, regionSquare, typeForRegion));
-            System.out.println("Регион добавлен успешно!");
-        } catch (WeatherServiceException e) {
+            daoRegion.create(new Region(0, regionName, regionSquare, found));
+
+        } catch (WeatherNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new WeatherServiceException("Ошибка БД при создании региона.");
+            throw new WeatherDatabaseException(
+                    "Ошибка БД при создании региона.", e);
         }
     }
 }

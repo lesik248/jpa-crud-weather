@@ -73,16 +73,14 @@ public class MyServlet extends HttpServlet {
             String uri = request.getRequestURI();
             String path = uri.replaceFirst(".*/MyServlettest/", "");
 
-            if (path.equals("") || path.equals("/")) {
-                controller = new HomeController();
-            } else if (path.startsWith("weather")) {
+          if (path.startsWith("weather")) {
                 controller = new WeatherController(path);
-            } else {
+          } else {
                 controller = new HomeController();
-            }
+          }
 
-            IServletWebExchange exchange = application.buildExchange(request, response);
-            controller.process(exchange, templateEngine, writer);
+        IServletWebExchange exchange = application.buildExchange(request, response);
+        controller.process(exchange, templateEngine, writer);
 
         } catch (Exception e) {
 
